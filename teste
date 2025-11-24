@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Um código pra fazer o Jaques sorrir</title>
+  <style>
+    :root{--bg:#fff6f9;--card:#fff;--accent:#ff4d86}
+    *{box-sizing:border-box;font-family:Inter,system-ui,Segoe UI,Roboto,Arial}
+    body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#fff6f9 0%,#fff 60%);padding:24px}
+    .card{width:100%;max-width:520px;background:var(--card);border-radius:18px;box-shadow:0 10px 30px rgba(0,0,0,0.08);padding:36px;text-align:center}
+    h1{margin:0 0 8px;font-size:22px;color:#333}
+    p.lead{margin:0 0 20px;color:#666}
+    .love{font-size:18px;margin:18px 0;padding:14px;border-radius:12px;background:linear-gradient(90deg,rgba(255,77,134,0.08),rgba(255,158,187,0.06));color:#222}
+    button.cta{background:var(--accent);border:0;color:white;padding:12px 18px;border-radius:12px;font-weight:600;cursor:pointer;font-size:16px}
+    .hidden{opacity:0;transform:translateY(10px);transition:all .45s cubic-bezier(.2,.9,.2,1)}
+    .show{opacity:1;transform:none}
+    .hearts{position:fixed;left:0;top:0;pointer-events:none;width:100%;height:100%;overflow:visible}
+    .heart{position:absolute;font-size:28px;will-change:transform,opacity}
+    footer{margin-top:18px;font-size:13px;color:#999}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Mensagem secreta</h1>
+    <p class="lead">Fica mais feliz, seu arrombado — escrito por <strong>Aline</strong>.</p>
+
+    <div id="principal" class="love">Oi Suel 👋💞<br>Eu gosto muito de você e não gosto de te ver triste ou mal, isso sempre me deixa mal, vc é uma das pessoas mais importantes desse mundo pra mim.se a minha vida fosse um mapa do Forza Horizon, você seria aquele evento lendário que eu quero repetir todo dia 😊</div>
+
+    <button id="botao" class="cta">Clica aqui</button>
+
+    <div id="surpresa" class="hidden" style="margin-top:16px">
+      <p><strong>Quer um segredo?</strong> Seu sorriso deixa o meu dia maravilhoso.</p>
+      <p>Toca no botão de novo pra mais corações 💖</p>
+    </div>
+
+    <footer>Se quiser, posso te dar meu belissimo coração.</footer>
+  </div>
+
+  <div class="hearts" id="hearts"></div>
+
+  <script>
+    // Personalize nomes aqui se quiser
+    const autor = 'Aline'
+    const alvo = 'Jaques'
+
+    // Pré-config
+    const botao = document.getElementById('botao')
+    const surpresa = document.getElementById('surpresa')
+    const principal = document.getElementById('principal')
+    const hearts = document.getElementById('hearts')
+
+    // Atualiza texto com nomes (mantém personalização sem repetir conteúdo na interface)
+    principal.innerHTML = `Oi ${alvo} 👋<br>👋💞<br>Se a minha vida fosse um mapa do Forza Horizon, você seria aquele evento lendário que eu quero repetir todo dia 😊`;
+
+    let clicks = 0
+    const cbumImg = document.getElementById('cbumImg')
+
+botao.addEventListener('click', () => {
+      clicks++
+      playTone()
+      burstHearts(12)
+      surpresa.classList.add('show')
+      // animação do botão
+      botao.animate([
+        { transform: 'scale(1)' },
+        { transform: 'scale(0.96)' },
+        { transform: 'scale(1)' }
+      ], { duration: 260, easing: 'cubic-bezier(.2,.9,.2,1)' })
+
+      if (clicks === 1) {
+        botao.textContent = 'Mais corações 💖'
+      } else if (clicks >= 1) {
+        cbumImg.style.display = 'block'
+      } else if (clicks >= 5) {
+        principal.innerHTML = `Sério, ${alvo} — seu sorriso me deixa leve. — ${autor}`
+      }
+    })
+
+    // Cria corações flutuantes
+    function burstHearts(n){
+      for(let i=0;i<n;i++){
+        const el = document.createElement('div')
+        el.className = 'heart'
+        el.textContent = ['💖','💗','💕','❤️'][Math.floor(Math.random()*4)]
+        const startX = window.innerWidth*0.5 + (Math.random()-0.5)*240
+        const startY = window.innerHeight*0.5 + (Math.random()-0.5)*100
+        el.style.left = startX + 'px'
+        el.style.top = startY + 'px'
+        hearts.appendChild(el)
+
+        const dx = (Math.random()-0.5)*200
+        const dy = - (Math.random()*260 + 120)
+        const rot = (Math.random()-0.5)*720
+        el.animate([
+          { transform: 'translate(0,0) rotate(0deg)', opacity:1 },
+          { transform: `translate(${dx}px, ${dy}px) rotate(${rot}deg)`, opacity:0 }
+        ], { duration: 1500 + Math.random()*700, easing: 'cubic-bezier(.2,.9,.2,1)' })
+
+        setTimeout(()=> el.remove(), 2500 + Math.random()*800)
+      }
+    }
+
+    // Toca um tom curto usando Web Audio API
+    function playTone(){
+      try{
+        const ctx = new (window.AudioContext || window.webkitAudioContext)()
+        const o = ctx.createOscillator()
+        const g = ctx.createGain()
+        o.type = 'sine'
+        o.frequency.value = 740
+        g.gain.value = 0.0001
+        o.connect(g); g.connect(ctx.destination)
+        const now = ctx.currentTime
+        g.gain.exponentialRampToValueAtTime(0.08, now + 0.01)
+        o.start(now)
+        g.gain.exponentialRampToValueAtTime(0.0001, now + 0.28)
+        o.stop(now + 0.3)
+      }catch(e){ /* áudio pode ser bloqueado em alguns navegadores */ }
+    }
+  </script>
+  <img id="cbumImg" src="/mnt/data/Jaques, seja legal com a Aline.png" style="display:none;max-width:100%;margin-top:20px;border-radius:16px;box-shadow:0 6px 20px rgba(0,0,0,0.12)">
+</body>
+</html>
